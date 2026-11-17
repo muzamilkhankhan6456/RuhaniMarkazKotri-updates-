@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="ur">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hazri Register - Ruhani Markaz Kotri</title>
+<link rel="icon" href="icon-192.png">
+<meta name="theme-color" content="#0b6b3a">
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+<style>
+*{box-sizing:border-box;font-family:system-ui}body{margin:0;background:#eef6f0;padding-bottom:80px}
+body[dir="rtl"]{direction:rtl;text-align:right}
+.header{background:#0b6b3a;color:#fff;padding:14px;text-align:center;border-radius:0 0 18px 18px;position:sticky;top:0;z-index:10}
+.header h1{margin:0;font-size:20px}
+.card{background:#fff;margin:10px;padding:12px;border-radius:14px;box-shadow:0 2px 8px #0001}
+input,select,textarea{width:100%;padding:12px;margin:5px 0;border:1px solid #ccc;border-radius:10px;font-size:15px}
+.btn{background:#0b6b3a;color:#fff;border:0;padding:13px;border-radius:12px;width:100%;font-weight:bold;font-size:15px}
+.btn2{background:#fff;color:#0b6b3a;border:1px solid #0b6b3a;padding:10px;border-radius:10px;width:100%;margin-top:6px;font-weight:bold}
+.btn-orange{background:#ff6a00;color:#fff;border:0;padding:10px;border-radius:10px;width:100%;font-weight:bold}
+.btn-red{background:#ff0000;color:#fff;border:0;padding:10px;border-radius:10px;width:100%;margin-top:6px;font-weight:bold}
+.list-item{display:flex;justify-content:space-between;align-items:center;background:#f8f9fa;padding:10px;border-radius:10px;margin-top:8px}
+.tabs{position:fixed;bottom:0;left:0;right:0;display:flex;background:#fff;border-top:1px solid #ddd;z-index:20}
+.tabs button{flex:1;padding:12px 2px;border:0;background:#fff;font-weight:700;font-size:12px}
+.tabs button.active{background:#0b6b3a;color:#fff}
+.tab{display:none}.tab.active{display:block}
+.badge{background:#0b6b3a;color:#fff;padding:2px 8px;border-radius:20px;font-size:12px}
+.receipt{background:#fff;border:2px dashed #0b6b3a;padding:15px;border-radius:12px;text-align:center;margin-top:10px}
+</style>
+</head>
+<body>
+<div class="header">
+<h1>📋 Hazri Register</h1>
+<p style="margin:3px 0;font-size:13px">Ruhani Markaz Kotri - Students / Ustad / Salary / Receipt</p>
+<p style="font-size:12px">Mohtamim: Molana Zubair Ahmed Sheikh Sb (dB) - 03003037168</p>
+<p id="cloudStatus" style="font-size:11px">☁️ Cloud: Connecting...</p>
+<button onclick="window.location.href='index.html'" style="background:#fff;color:#0b6b3a;border:0;padding:8px 18px;border-radius:10px;font-weight:bold">⬅️ Wapas Main App Pe Jao</button>
+</div>
+
+<div id="tab-student" class="tab active">
+<div class="card">
+<h3 style="margin:0">👦 Naya Student Add Karo</h3>
+<input id="stName" placeholder="👦 Student Ka Poora Naam">
+<input id="stFather" placeholder="👨 Walid Ka Naam">
+<input id="stPhone" placeholder="📱 Walid Ka Mobile - 03001234567">
+<input id="stClass" placeholder="📗 Class - Misal: Nazra / Hifz / Qaida">
+<input id="stFees" type="number" placeholder="💰 Monthly Fees - Misal: 500">
+<button class="btn" onclick="addStudent()">+ Student Add Karo ✅</button>
+</div>
+<div class="card">
+<h3 style="margin:0">🔍 Student Dhoondo</h3>
+<input id="stSearch" placeholder="Naam se dhoondo..." oninput="renderStudents()">
+<div id="studentList"></div>
+</div>
+<div class="card">
+<h3 style="margin:0">📋 Aaj Ki Hazri - <span id="todayDate"></span></h3>
+<p style="font-size:12px;color:#666">Har student ke samne Present / Absent / Leave select karo, phir Save dabao</p>
+<div id="attList"></div>
+<button class="btn" onclick="saveAttendance()">✅ Aaj Ki Hazri Save Karo</button>
+<p id="attMsg" style="text-align:center;color:#0b6b3a;font-weight:bold"></p>
+</div>
+</div>
+
+<div id="tab-teacher" class="tab">
+<div class="card">
+<h3 style="margin:0">👳 Ustad / Teacher Add Karo</h3>
+<input id="tName" placeholder="👳 Ustad Ka Naam">
+<input id="tPhone" placeholder="📱 Ustad Ka Mobile">
+<input id="tSubject" placeholder="📗 Kya Parhate Hain? - Hifz / Nazra / Qaida">
+<input id="tSalary" type="number" placeholder="💰 Monthly Tankhwah - Misal: 15000">
+<button class="btn" onclick="addTeacher()">+ Ustad Add Karo ✅</button>
+</div>
+<div class="card"><h3 style="margin:0">👳 Sab Ustad</h3><div id="teacherList"></div></div>
+<div class="card">
+<h3 style="margin:0">💰 Tankhwah Do - Salary</h3>
+<select id="salaryTeacher"></select>
+<input id="salaryAmount" type="number" placeholder="Kitni Tankhwah Di? - Rs">
+<input id="salaryMonth" placeholder="Kis Mahine Ki? - Misal: November 2026">
+<button class="btn-orange" onclick="paySalary()">💰 Tankhwah Pay Karo + Receipt Banao</button>
+<div id="salaryList"></div>
+</div>
+</div>
+
+<div id="tab-fees" class="tab">
+<div class="card">
+<h3 style="margin:0">💰 Fees Jama Karo + Receipt</h3>
+<select id="feesStudent"></select>
+<input id="feesAmount" type="number" placeholder="Kitni Fees Li? - Rs">
+<input id="feesMonth" placeholder="Kis Mahine Ki Fees? - Misal: November 2026">
+<button class="btn" onclick="payFees()">💰 Fees Jama Karo + Receipt Banao ✅</button>
+<div id="receiptBox"></div>
+</div>
+<div class="card"><h3 style="margin:0">🧾 Sab Receipts / Fees History</h3><div id="feesList"></div></div>
+<div class="card">
+<h3 style="margin:0">📊 Aaj Ka Hisab</h3>
+<p id="todayTotal" style="font-size:18px;font-weight:bold;color:#0b6b3a">Total: Rs 0</p>
+<button class="btn2" onclick="sendReport()">📱 WhatsApp Pe Report Bhejo - Owner + Mohtamim Ko</button>
+</div>
+</div>
+
+<div class="tabs">
+<button id="tb-student" class="active" onclick="switchTab('student')">👦 Students</button>
+<button id="tb-teacher" onclick="switchTab('teacher')">👳 Ustad</button>
+<button id="tb-fees" onclick="switchTab('fees')">💰 Fees / Receipt</button>
+</div>
+
+<script>
+const firebaseConfig = { apiKey: "AIzaSyCm6fpmntJmEiP0POM4Xi829CIu8Gni8Pw", authDomain: "ruhanimarkazkotri.firebaseapp.com", databaseURL: "https://ruhanimarkazkotri-default-rtdb.firebaseio.com", projectId: "ruhanimarkazkotri", storageBucket: "ruhanimarkazkotri.firebasestorage.app", messagingSenderId: "906148918722", appId: "1:906148918722:web:d6c78aff570d9a3f67925b", measurementId: "G-L73LV908LG" };
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+db.ref(".info/connected").on("value", s=>{ let el=document.getElementById("cloudStatus"); if(s.val()==true){ el.innerText="☁️ Cloud Connected ✅"; el.style.color="#d4ffd4"; } });
+document.getElementById("todayDate").innerText = new Date().toLocaleDateString("en-PK");
+function switchTab(t){ document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active')); document.querySelectorAll('.tabs button').forEach(x=>x.classList.remove('active')); document.getElementById('tab-'+t).classList.add('active'); document.getElementById('tb-'+t).classList.add('active'); }
+function toWA(p){ p=(p||"").replace(/\D/g,""); if(p.startsWith("0")) p="92"+p.slice(1); return p; }
+let allStudents={}; let allTeachers={}; let allFees={}; let allSalary={};
+db.ref("hazri_students").on("value", s=>{ allStudents=s.val()||{}; renderStudents(); renderAtt(); renderFeesSelect(); });
+db.ref("hazri_teachers").on("value", s=>{ allTeachers=s.val()||{}; renderTeachers(); renderSalarySelect(); });
+db.ref("hazri_fees").on("value", s=>{ allFees=s.val()||{}; renderFees(); });
+db.ref("hazri_salary").on("value", s=>{ allSalary=s.val()||{}; renderSalary(); });
+function addStudent(){ let n=document.getElementById("stName").value.trim(); let f=document.getElementById("stFather").value.trim(); let p=document.getElementById("stPhone").value.trim(); let c=document.getElementById("stClass").value.trim(); let fees=document.getElementById("stFees").value.trim()||"500"; if(!n){ alert("Student Ka Naam Likhein!"); return; } db.ref("hazri_students").push({name:n, father:f, phone:p, class:c, fees:fees, date:new Date().toLocaleDateString("en-PK")}); alert("Student Add Ho Gaya ✅"); document.getElementById("stName").value=""; document.getElementById("stFather").value=""; document.getElementById("stPhone").value=""; document.getElementById("stClass").value=""; document.getElementById("stFees").value=""; }
+function renderStudents(){ let q=(document.getElementById("stSearch")?.value||"").toLowerCase(); let h=""; for(let id in allStudents){ let s=allStudents[id]; if(q && !s.name.toLowerCase().includes(q)) continue; h+='<div class="list-item"><div><b>'+s.name+'</b><br><small>Walid: '+s.father+' | Class: '+s.class+' | 📱 '+s.phone+'</small><br><small>Fees: Rs '+s.fees+'/Mahina</small></div><button onclick="if(confirm(\'Student Delete?\'))db.ref(\'hazri_students/'+id+'\').remove()" style="background:#ff5252;color:#fff;border:0;padding:6px 10px;border-radius:8px">X</button></div>'; } document.getElementById("studentList").innerHTML=h||"Abhi koi Student nahi"; }
+function renderAtt(){ let h=""; for(let id in allStudents){ let s=allStudents[id]; h+='<div class="list-item"><div><b>'+s.name+'</b><br><small>'+s.class+'</small></div><select id="att_'+id+'" style="width:130px"><option value="Present">✅ Present</option><option value="Absent">❌ Absent</option><option value="Leave">🏠 Leave</option></select></div>'; } document.getElementById("attList").innerHTML=h||"Pehle Student Add Karo"; }
+function saveAttendance(){ let d=new Date().toLocaleDateString("en-PK"); let att={}; let present=0; for(let id in allStudents){ let st=document.getElementById("att_"+id).value; att[id]={name:allStudents[id].name, class:allStudents[id].class, status:st}; if(st=="Present") present++; } db.ref("hazri_attendance/"+d).set(att); document.getElementById("attMsg").innerText="Hazri Save Ho Gayi ✅ - "+d+" | Present: "+present+" / Total: "+Object.keys(allStudents).length; alert("Hazri Save ✅ Present: "+present); }
+function addTeacher(){ let n=document.getElementById("tName").value.trim(); let p=document.getElementById("tPhone").value.trim(); let sub=document.getElementById("tSubject").value.trim(); let sal=document.getElementById("tSalary").value.trim()||"15000"; if(!n){ alert("Ustad Ka Naam Likhein!"); return; } db.ref("hazri_teachers").push({name:n, phone:p, subject:sub, salary:sal, date:new Date().toLocaleDateString("en-PK")}); alert("Ustad Add Ho Gaya ✅"); }
+function renderTeachers(){ let h=""; for(let id in allTeachers){ let t=allTeachers[id]; h+='<div class="list-item"><div><b>'+t.name+'</b><br><small>'+t.subject+' | 📱 '+t.phone+'</small><br><small>Tankhwah: Rs '+t.salary+'/Mahina</small></div><button onclick="if(confirm(\'Ustad Delete?\'))db.ref(\'hazri_teachers/'+id+'\').remove()" style="background:#ff5252;color:#fff;border:0;padding:6px 10px;border-radius:8px">X</button></div>'; } document.getElementById("teacherList").innerHTML=h||"Abhi koi Ustad nahi"; }
+function renderSalarySelect(){ let h=""; for(let id in allTeachers){ h+='<option value="'+id+'">'+allTeachers[id].name+' - Rs '+allTeachers[id].salary+'</option>'; } document.getElementById("salaryTeacher").innerHTML=h||"<option>Pehle Ustad Add Karo</option>"; }
+function paySalary(){ let id=document.getElementById("salaryTeacher").value; let amt=document.getElementById("salaryAmount").value.trim(); let month=document.getElementById("salaryMonth").value.trim()||new Date().toLocaleDateString("en-PK"); if(!allTeachers[id]){ alert("Pehle Ustad Add Karo!"); return; } if(!amt){ alert("Kitni Tankhwah Di? Likhein!"); return; } let t=allTeachers[id]; db.ref("hazri_salary").push({teacher:t.name, phone:t.phone, amount:amt, month:month, date:new Date().toLocaleDateString("en-PK")+" "+new Date().toLocaleTimeString("en-PK")}); alert("Tankhwah Pay Ho Gayi ✅ "+t.name+" - Rs "+amt); }
+function renderSalary(){ let h=""; for(let id in allSalary){ let s=allSalary[id]; h+='<div class="list-item"><div><b>'+s.teacher+'</b><br><small>'+s.month+' | '+s.date+'</small></div><b style="color:#ff6a00">Rs '+s.amount+'</b></div>'; } document.getElementById("salaryList").innerHTML=h||"Abhi koi Tankhwah nahi"; }
+function renderFeesSelect(){ let h=""; for(let id in allStudents){ h+='<option value="'+id+'">'+allStudents[id].name+' - '+allStudents[id].father+' - Rs '+allStudents[id].fees+'</option>'; } document.getElementById("feesStudent").innerHTML=h||"<option>Pehle Student Add Karo</option>"; }
+function payFees(){ let id=document.getElementById("feesStudent").value; let amt=document.getElementById("feesAmount").value.trim(); let month=document.getElementById("feesMonth").value.trim()||new Date().toLocaleDateString("en-PK"); if(!allStudents[id]){ alert("Pehle Student Add Karo!"); return; } if(!amt){ alert("Kitni Fees Li? Likhein!"); return; } let s=allStudents[id]; let recNo="RM-"+Math.floor(1000+Math.random()*9000); let data={student:s.name, father:s.father, phone:s.phone, amount:amt, month:month, receipt:recNo, date:new Date().toLocaleDateString("en-PK")+" "+new Date().toLocaleTimeString("en-PK")}; db.ref("hazri_fees").push(data); document.getElementById("receiptBox").innerHTML='<div class="receipt"><h2 style="margin:0;color:#0b6b3a">🕌 Ruhani Markaz Kotri</h2><p style="margin:2px 0;font-size:12px">Mohtamim: Molana Zubair Ahmed Sheikh Sb</p><hr><p><b>Receipt No: '+recNo+'</b></p><p>Student: <b>'+s.name+'</b><br>Walid: '+s.father+'<br>Class: '+s.class+'<br>Mahina: '+month+'<br><b style="font-size:20px;color:#0b6b3a">Fees: Rs '+amt+'</b><br>Date: '+data.date+'</p><hr><p style="font-size:12px">Duaon Ka Talib - Ruhani Markaz Kotri</p><button class="btn" onclick="window.print()">🖨️ Receipt Print Karo</button><button class="btn2" onclick="shareReceipt(\''+recNo+'\',\''+s.name+'\',\''+amt+'\',\''+month+'\')">📱 WhatsApp Pe Receipt Bhejo</button></div>'; alert("Fees Jama ✅ Receipt No: "+recNo); }
+function shareReceipt(no, name, amt, month){ let msg="🕌 Ruhani Markaz Kotri - Fees Receipt%0A%0AReceipt No: "+no+"%0AStudent: "+encodeURIComponent(name)+"%0AFees: Rs "+amt+"%0AMahina: "+encodeURIComponent(month)+"%0A%0AJazakAllah!"; window.open("https://wa.me/?text="+msg,"_blank"); }
+function renderFees(){ let h=""; let total=0; for(let id in allFees){ let f=allFees[id]; total+=parseInt(f.amount||0); h+='<div class="list-item"><div><b>'+f.student+'</b> <span class="badge">'+f.receipt+'</span><br><small>'+f.month+' | '+f.date+'</small></div><b>Rs '+f.amount+'</b></div>'; } document.getElementById("feesList").innerHTML=h||"Abhi koi Fees nahi"; document.getElementById("todayTotal").innerText="Total Fees Jama (Sab): Rs "+total; }
+function sendReport(){ let totalStudents=Object.keys(allStudents).length; let totalTeachers=Object.keys(allTeachers).length; let totalFees=0; for(let id in allFees){ totalFees+=parseInt(allFees[id].amount||0); } let msg="📋 Hazri Register Report - Ruhani Markaz Kotri%0A%0A👦 Total Students: "+totalStudents+"%0A👳 Total Ustad: "+totalTeachers+"%0A💰 Total Fees Jama: Rs "+totalFees+"%0A📅 Date: "+new Date().toLocaleDateString("en-PK"); window.open("https://wa.me/923170880615?text="+msg,"_blank"); setTimeout(()=>{ window.open("https://wa.me/923003037168?text="+msg,"_blank"); },900); alert("Report 2 Number Pe Bhej Di ✅"); }
+</script>
+</body>
+</html>
