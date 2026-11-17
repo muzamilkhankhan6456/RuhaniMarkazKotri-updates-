@@ -6,7 +6,6 @@ const FILES_TO_CACHE = [
   "/RuhaniMarkazKotri-updates-/icon-192.png",
   "/RuhaniMarkazKotri-updates-/icon-512.png"
 ];
-
 self.addEventListener("install", (e) => {
   self.skipWaiting();
   e.waitUntil(
@@ -15,7 +14,6 @@ self.addEventListener("install", (e) => {
     }).catch(() => {})
   );
 });
-
 self.addEventListener("activate", (e) => {
   e.waitUntil(
     caches.keys().then((keys) => {
@@ -30,7 +28,6 @@ self.addEventListener("activate", (e) => {
   );
   self.clients.claim();
 });
-
 self.addEventListener("fetch", (e) => {
   if (e.request.method !== "GET") return;
   if (e.request.url.includes("firebase") || e.request.url.includes("googleapis") || e.request.url.includes("gstatic")) {
