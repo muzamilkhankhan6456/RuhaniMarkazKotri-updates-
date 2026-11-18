@@ -188,26 +188,29 @@ function switchTab(t){ document.querySelectorAll('.tab').forEach(x=>x.classList.
 function needLogin(){ if(!currentUser){ alert(curLang=="en"?"First Login With Code!":curLang=="ar"?"سجل الدخول بالرمز أولاً!":"پہلے کوڈ سے لاگ ان کرو!"); document.getElementById("loginCard").scrollIntoView({behavior:"smooth"}); return false; } return true; }
 function shareAny(title, url){ let text = title + " - Ruhani Markaz Kotri Updates - " + url; if(navigator.share){ navigator.share({title:title, text:text, url:url}).catch(()=>{}); } else { window.open("https://wa.me/?text=" + encodeURIComponent(text), "_blank"); } }
 function openWallet(type){
-  let num = "";
   if(type=='easypaisa'){
-    num = document.getElementById("showEasy").innerText.trim();
+    let num = document.getElementById("showEasy").innerText.trim();
     if(navigator.clipboard) navigator.clipboard.writeText(num).catch(()=>{});
-    alert("Easypaisa App khol raha hun ✅\nNumber Copy ho gaya: "+num+"\nApp me Paste karke Send karo!");
-    window.location.href = "easypaisa://";
-    setTimeout(()=>{ window.open("https://play.google.com/store/apps/details?id=pk.com.telenor.easypaisa","_blank"); }, 1500);
+    alert("Number Copy ho gaya ✅: "+num+"\nAb Easypaisa App khul rahi hai - Wahan Paste karke Send karo!");
+    let a = document.createElement("a");
+    a.href = "intent://#Intent;package=pk.com.telenor.easypaisa;action=android.intent.action.MAIN;category=android.intent.category.LAUNCHER;end";
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(()=>{ window.location.href = "easypaisa://"; }, 300);
   }
   if(type=='jazzcash'){
-    num = document.getElementById("showJazz").innerText.trim();
+    let num = document.getElementById("showJazz").innerText.trim();
     if(navigator.clipboard) navigator.clipboard.writeText(num).catch(()=>{});
-    alert("JazzCash App khol raha hun ✅\nNumber Copy ho gaya: "+num+"\nApp me Paste karke Send karo!");
-    window.location.href = "jazzcash://";
-    setTimeout(()=>{ window.open("https://play.google.com/store/apps/details?id=com.techlogix.mobilink_customer","_blank"); }, 1500);
+    alert("Number Copy ho gaya ✅: "+num+"\nAb JazzCash App khul rahi hai - Wahan Paste karke Send karo!");
+    let a = document.createElement("a");
+    a.href = "intent://#Intent;package=com.techlogix.mobilink_customer;action=android.intent.action.MAIN;category=android.intent.category.LAUNCHER;end";
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(()=>{ window.location.href = "jazzcash://"; }, 300);
   }
   if(type=='bank'){
     let acc = document.getElementById("showBank").innerText.trim();
     let name = document.getElementById("showBankName").innerText.trim();
     if(navigator.clipboard) navigator.clipboard.writeText(acc+" - "+name).catch(()=>{});
-    alert("Bank Account Copy ho gaya ✅\n"+acc+"\n"+name+"\n\nApni Bank App kholo aur Paste karke Send karo!");
+    alert("Bank Account Copy ho gaya ✅\n"+acc+"\n"+name+"\n\nAb apni Bank App khud kholo aur Paste karke Send karo!");
   }
 }
 function downloadVideo(title, url){ if(!needLogin()) return; if(url.includes(".mp4")){ let a=document.createElement("a"); a.href=url; a.download=title+".mp4"; a.target="_blank"; document.body.appendChild(a); a.click(); a.remove(); alert("Download Shuru ✅"); } else { alert(curLang=="en"?"Opening Video For Download":"Download ke liye Video khol raha hun"); window.open(url, "_blank"); } }
